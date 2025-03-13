@@ -4,9 +4,9 @@ namespace SuperTaskBowl.Data.Repositories;
 
 public interface ITaskRepository
 {
-    Task<IEnumerable<TaskItem>> GetAllAsync();
-    Task<TaskItem?> GetByIdAsync(int id);
-    Task AddAsync(TaskItem task);
-    Task UpdateAsync(TaskItem task);
-    Task DeleteAsync(int id);
+    IEnumerable<TaskItem> GetAll();
+    TaskItem? GetById(int id);
+    void Add(TaskItem task);
+    void Update(TaskItem task);
+    void Delete(int id);
 }

@@ -13,23 +13,24 @@ public class TaskService : ITaskService
         _taskRepository = taskRepository;
     }
 
-    public async Task<IEnumerable<TaskDto>> GetTasksAsync()
+    public IEnumerable<TaskReadDto> GetTasks()
     {
-        var tasks = await _taskRepository.GetAllAsync();
-        return tasks.Select(t => new TaskDto
+        var tasks = _taskRepository.GetAll();
+        return tasks.Select(t => new TaskReadDto
         {
             Id = t.Id,
             Title = t.Title,
             Description = t.Description,
             DueDate = t.DueDate,
             IsCompleted = t.IsCompleted
-        });
+        }).ToList();
     }
 
-    public async Task<TaskDto?> GetTaskByIdAsync(int id)
+    public TaskReadDto? GetTaskById(int id)
     {
-        var task = await _taskRepository.GetByIdAsync(id);
-        return task == null ? null : new TaskDto
+        var task = _taskRepository.GetById(id);
+        if (task == null) return null;
+        return new TaskReadDto
         {
             Id = task.Id,
             Title = task.Title,
@@ -39,33 +40,52 @@ public class TaskService : ITaskService
         };
     }
 
-    public async Task AddTaskAsync(TaskDto taskDto)
+    public TaskReadDto AddTask(TaskCreateDto taskCreateDto)
     {
         var task = new TaskItem
         {
-            Title = taskDto.Title,
-            Description = taskDto.Description,
-            DueDate = taskDto.DueDate,
-            IsCompleted = taskDto.IsCompleted
+            Title = taskCreateDto.Title,
+            Description = taskCreateDto.Description,
+            DueDate = taskCreateDto.DueDate,
+            IsCompleted = false
         };
-        await _taskRepository.AddAsync(task);
-    }
 
-    public async Task UpdateTaskAsync(int id, TaskDto taskDto)
-    {
-        var task = await _taskRepository.GetByIdAsync(id);
-        if (task != null)
+        _taskRepository.Add(task);
+
+        return new TaskReadDto
         {
-            task.Title = taskDto.Title;
-            task.Description = taskDto.Description;
-            task.DueDate = taskDto.DueDate;
-            task.IsCompleted = taskDto.IsCompleted;
-            await _taskRepository.UpdateAsync(task);
-        }
+            Id = task.Id,
+            Title = task.Title,
+            Description = task.Description,
+            DueDate = task.DueDate,
+            IsCompleted = task.IsCompleted
+        };
     }
 
-    public async Task DeleteTaskAsync(int id)
+    public TaskReadDto? UpdateTask(int id, TaskUpdateDto taskUpdateDto)
     {
-        await _taskRepository.DeleteAsync(id);
+        var task = _taskRepository.GetById(id);
+        if (task == null) return null;
+
+        task.Title = taskUpdateDto.Title;
+        task.Description = taskUpdateDto.Description;
+        task.DueDate = taskUpdateDto.DueDate;
+        task.IsCompleted = taskUpdateDto.IsCompleted;
+
+        _taskRepository.Update(task);
+
+        return new TaskReadDto
+        {
+            Id = task.Id,
+            Title = task.Title,
+            Description = task.Description,
+            DueDate = task.DueDate,
+            IsCompleted = task.IsCompleted
+        };
+    }
+
+    public void DeleteTask(int id)
+    {
+        _taskRepository.Delete(id);
     }
 }

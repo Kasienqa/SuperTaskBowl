@@ -4,9 +4,9 @@ namespace SuperTaskBowl.Services;
 
 public interface ITaskService
 {
-    Task<IEnumerable<TaskDto>> GetTasksAsync();
-    Task<TaskDto?> GetTaskByIdAsync(int id);
-    Task AddTaskAsync(TaskDto task);
-    Task UpdateTaskAsync(int id, TaskDto task);
-    Task DeleteTaskAsync(int id);
+        IEnumerable<TaskReadDto> GetTasks();
+        TaskReadDto? GetTaskById(int id);
+        TaskReadDto AddTask(TaskCreateDto taskCreateDto);
+        TaskReadDto? UpdateTask(int id, TaskUpdateDto taskUpdateDto);
+        void DeleteTask(int id);
 }

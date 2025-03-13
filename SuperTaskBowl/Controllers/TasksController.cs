@@ -5,7 +5,7 @@ using SuperTaskBowl.Services;
 namespace SuperTaskBowl.Controllers;
 
 [ApiController]
-[Route("tasks")]
+[Route("/api/tasks")]
 public class TasksController : ControllerBase
 {
     private readonly ITaskService _taskService;
@@ -15,42 +15,59 @@ public class TasksController : ControllerBase
         _taskService = taskService;
     }
 
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<TaskDto>>> GetTasks()
+    [HttpGet("")]
+    public List<TaskReadDto> GetTaskList()
     {
-        var tasks = await _taskService.GetTasksAsync();
-        return Ok(tasks);
+        return _taskService.GetTasks().ToList();
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<TaskDto>> GetTask(int id)
+    public TaskReadDto GetTask([FromRoute] int id)
     {
-        var task = await _taskService.GetTaskByIdAsync(id);
+        var task = _taskService.GetTaskById(id);
         if (task == null)
-            return NotFound();
-
-        return Ok(task);
+        {
+            throw new KeyNotFoundException($"Zadanie o ID {id} nie zostało znalezione.");
+        }
+        return task;
     }
 
-    [HttpPost]
-    public async Task<IActionResult> CreateTask([FromBody] TaskDto taskDto)
+    [HttpPost("")]
+    public TaskReadDto AddTask([FromBody] TaskCreateDto taskCreateDto)
     {
-        await _taskService.AddTaskAsync(taskDto);
-        return CreatedAtAction(nameof(GetTask), new { id = taskDto.Id }, taskDto);
+        if (string.IsNullOrWhiteSpace(taskCreateDto.Title))
+        {
+            throw new ArgumentException("Tytuł zadania nie może być pusty.");
+        }
+
+        return _taskService.AddTask(taskCreateDto);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateTask(int id, [FromBody] TaskDto taskDto)
+    public TaskReadDto UpdateTask([FromRoute] int id, [FromBody] TaskUpdateDto taskUpdateDto)
     {
-        await _taskService.UpdateTaskAsync(id, taskDto);
-        return NoContent();
+        if (string.IsNullOrWhiteSpace(taskUpdateDto.Title))
+        {
+            throw new ArgumentException("Tytuł zadania nie może być pusty.");
+        }
+
+        var updatedTask = _taskService.UpdateTask(id, taskUpdateDto);
+        if (updatedTask == null)
+        {
+            throw new KeyNotFoundException($"Zadanie o ID {id} nie zostało znalezione.");
+        }
+        return updatedTask;
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteTask(int id)
+    public void DeleteTask([FromRoute] int id)
     {
-        await _taskService.DeleteTaskAsync(id);
-        return NoContent();
+        var task = _taskService.GetTaskById(id);
+        if (task == null)
+        {
+            throw new KeyNotFoundException($"Zadanie o ID {id} nie zostało znalezione.");
+        }
+
+        _taskService.DeleteTask(id);
     }
 }
-

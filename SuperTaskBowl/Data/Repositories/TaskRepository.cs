@@ -2,7 +2,6 @@
 using SuperTaskBowl.Models;
 
 namespace SuperTaskBowl.Data.Repositories;
-
 public class TaskRepository : ITaskRepository
 {
     private readonly AppDbContext _context;
@@ -12,35 +11,36 @@ public class TaskRepository : ITaskRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<TaskItem>> GetAllAsync()
+    public IEnumerable<TaskItem> GetAll()
     {
-        return await _context.Tasks.ToListAsync();
+        return _context.Tasks.ToList();
     }
 
-    public async Task<TaskItem?> GetByIdAsync(int id)
+    public TaskItem? GetById(int id)
     {
-        return await _context.Tasks.FindAsync(id);
+        return _context.Tasks.Find(id);
     }
 
-    public async Task AddAsync(TaskItem task)
+    public void Add(TaskItem task)
     {
-        await _context.Tasks.AddAsync(task);
-        await _context.SaveChangesAsync();
+        _context.Tasks.Add(task);
+        _context.SaveChanges();
     }
 
-    public async Task UpdateAsync(TaskItem task)
+    public void Update(TaskItem task)
     {
         _context.Tasks.Update(task);
-        await _context.SaveChangesAsync();
+        _context.SaveChanges();
     }
 
-    public async Task DeleteAsync(int id)
+    public void Delete(int id)
     {
-        var task = await _context.Tasks.FindAsync(id);
+        var task = _context.Tasks.Find(id);
         if (task != null)
         {
             _context.Tasks.Remove(task);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
     }
 }
+

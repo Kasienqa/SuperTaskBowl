@@ -1,6 +1,6 @@
 ﻿namespace SuperTaskBowl.DTOs;
 
-public class TaskDto
+public class TaskReadDto
 {
     public int Id { get; set; }
     public string Title { get; set; } = string.Empty;
